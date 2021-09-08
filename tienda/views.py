@@ -12,7 +12,7 @@ from tienda.forms import ClienteForm,UsuarioForm
 
 from django.contrib.auth.decorators import login_required
 
-#### paypal ##########33
+#### PAYPAL ########
 from paypal.standard.forms import PayPalPaymentsForm
 
 # Create your views here.
@@ -146,46 +146,46 @@ def pedido(request):
                 totalPedido += float(value["total"])
             
             nuevoPedido.total = totalPedido
-            nuevoPedido.save()            
-            ### PARA PAGO PAYPAL ##########333
-            request.session['paypal_pid']=nuevoPedido.id
+            nuevoPedido.save()
+            ###### PARA PAGO PAYPAL####
+            request.session['paypal_pid'] = nuevoPedido.id
             host = request.get_host()
             paypal_datos = {
                 'business': settings.PAYPAL_RECEIVER_EMAIL,
                 'amount': nuevoPedido.total,
                 'item_name': 'PEDIDO #' + str(nuevoPedido.id),
                 'invoice': str(nuevoPedido.id),
-                'notify_url':'http://'+host+'/'+'paypal-ipn',
-                'return_url':'http://'+host+'/pagoexitosopaypal'
+                'notify_url': 'http://' + host + '/' + 'paypal-ipn',
+                'return_url':'http://' + host + '/pagoexitosopaypal'
             }
-            formPedidoPaypal = PayPalPaymentsForm(initial = paypal_datos)
+            formPedidoPaypal = PayPalPaymentsForm(initial=paypal_datos)
             context = {
                 'pedido' : nuevoPedido,
                 'detalles':lstDetallePedidos,
                 'formpaypal': formPedidoPaypal
             }
-            
             return render(request,'pedido.html',context)
         except:
             return redirect('/login')
     else:
         return redirect('/login')
-
-  
+    
 @login_required
 def logout_view(request):
     """Logout a user."""
     logout(request)
     return redirect('/login')
 
-
-##################paypal###################33
+################# PAYPAL ######################3
 def pago_exitoso_paypal(request):
     pedido_id = request.session.get('paypal_pid')
     pedido = Pedido.objects.get(id=pedido_id)
-    pedido.estado ='1'
+    pedido.estado = '1'
     pedido.save()
     context = {
-        'pedido':pedido
+     'pedido': pedido   
     }
     return render(request,'pagoexitosopaypal.html',context)
+    
+            
+    
